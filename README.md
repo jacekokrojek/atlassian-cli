@@ -32,17 +32,6 @@ set CONFLUENCE_URL=https://your-domain.atlassian.net/wiki
 
 Usage examples:
 
-```bash
-# Jira (package entrypoint)
-atlassian-cli jira get-issue ISSUE-1 --url https://your-domain.atlassian.net
-# or if JIRA_URL is set in env:
-atlassian-cli jira get-issue ISSUE-1
-
-# Confluence (package entrypoint)
-atlassian-cli confluence get-page 123456 --url https://your-domain.atlassian.net/wiki
-```
-
-Or, run individual standalone scripts (no package import needed):
 
 ```bash
 # Jira: get an issue

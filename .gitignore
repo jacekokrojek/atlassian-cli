@@ -9,6 +9,7 @@ venv/
 
 # env files
 .env
+.pytest_cache/
 
 # Editor
 .vscode/

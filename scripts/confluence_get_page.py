@@ -4,24 +4,27 @@
 Usage: python scripts/confluence_get_page.py PAGE_ID --url <CONFLUENCE_URL>
 """
 import json
-import click
+import os
+import sys
+import argparse
 from atlassian import Confluence
 
+def main():
+    parser = argparse.ArgumentParser(description='Get a Confluence page by ID and print JSON')
+    parser.add_argument('page_id')
+    parser.add_argument('--url', default=os.environ.get('CONFLUENCE_URL'), required=True,
+                        help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
+    parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
+    parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
 
-@click.command()
-@click.argument('page_id')
-@click.option('--url', envvar='CONFLUENCE_URL', required=True, help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
-@click.option('--username', envvar='USERNAME', prompt=True, help='Username')
-@click.option('--password', envvar='PASSWORD', prompt=True, hide_input=True, help='Password or token')
-def main(page_id, url, username, password):
-    # Username/password are provided via option, envvar, or prompted by Click if missing
+    args = parser.parse_args()
 
-    client = Confluence(url=url, username=username, password=password)
+    client = Confluence(url=args.url, username=args.username, password=args.password)
     try:
-        page = client.get_page_by_id(page_id, expand='body.storage')
-        click.echo(json.dumps(page, indent=2))
+        page = client.get_page_by_id(args.page_id, expand='body.view')
+        print(json.dumps(page, indent=2))
     except Exception as e:
-        click.echo(f"Error fetching page {page_id}: {e}", err=True)
+        print(f"Error fetching page {args.page_id}: {e}", file=sys.stderr)
         raise SystemExit(1)
 
 

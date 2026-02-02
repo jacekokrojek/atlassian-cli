@@ -4,29 +4,34 @@
 Usage: python scripts/jira_issue_search.py 'project = XYZ' --url <JIRA_URL> [--start] [--limit] [--all]
 """
 import json
-import click
+import os
+import sys
+import argparse
 from atlassian import Jira
+from atlassian_cli.utils import require_auth
 
 
-@click.command()
-@click.argument('jql')
-@click.option('--url', envvar='JIRA_URL', required=True, help='Jira base URL (e.g. https://your-domain.atlassian.net)')
-@click.option('--start', default=0, type=int, help='Start index for pagination')
-@click.option('--limit', default=50, type=int, help='Max results per page')
-@click.option('--all', 'all_pages', is_flag=True, help='Fetch all pages of results')
-@click.option('--username', envvar='USERNAME', prompt=True, help='Username')
-@click.option('--password', envvar='PASSWORD', prompt=True, hide_input=True, help='Password or token')
-def main(jql, url, start, limit, all_pages, username, password):
-    # Username/password are provided via option, envvar, or prompted by Click if missing
+def main():
+    parser = argparse.ArgumentParser(description='Search Jira issues via JQL and print JSON')
+    parser.add_argument('jql')
+    parser.add_argument('--url', default=os.environ.get('JIRA_URL'), required=True,
+                        help='Jira base URL (e.g. https://your-domain.atlassian.net)')
+    parser.add_argument('--start', type=int, default=0, help='Start index for pagination')
+    parser.add_argument('--limit', type=int, default=50, help='Max results per page')
+    parser.add_argument('--all', dest='all_pages', action='store_true', help='Fetch all pages of results')
+    parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
+    parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
 
-    client = Jira(url=url, username=username, password=password)
+    args = parser.parse_args()
+
+    client = Jira(url=args.url, username=args.username, password=args.password)
     try:
         def fetch(start_at):
-            return client.jql(jql, start=start_at, limit=limit)
+            return client.jql(args.jql, start=start_at, limit=args.limit)
 
-        if all_pages:
+        if args.all_pages:
             all_issues = []
-            start_at = start
+            start_at = args.start
             while True:
                 res = fetch(start_at)
                 if isinstance(res, dict):
@@ -46,17 +51,17 @@ def main(jql, url, start, limit, all_pages, username, password):
                     if start_at >= total:
                         break
                 else:
-                    if len(issues) < limit:
+                    if len(issues) < args.limit:
                         break
-                    start_at += limit
+                    start_at += args.limit
 
-            click.echo(json.dumps({'total': len(all_issues), 'issues': all_issues}, indent=2))
+            print(json.dumps({'total': len(all_issues), 'issues': all_issues}, indent=2))
         else:
-            res = fetch(start)
-            click.echo(json.dumps(res, indent=2))
+            res = fetch(args.start)
+            print(json.dumps(res, indent=2))
 
     except Exception as e:
-        click.echo(f"Error performing JQL search: {e}", err=True)
+        print(f"Error performing JQL search: {e}", file=sys.stderr)
         raise SystemExit(1)
 
 
