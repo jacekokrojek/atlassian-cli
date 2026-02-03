@@ -17,15 +17,16 @@ def main():
                         help='Output path for PDF (defaults to confluence_page_<id>.pdf)')
     parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
     parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
+    parser.add_argument('--verify-ssl', dest='verify_ssl', action='store_true', help='Enable SSL verification (default: False)')
 
     args = parser.parse_args()
 
     try:
-        confluence = Confluence(url=args.url, username=username, password=password)
+        confluence = Confluence(url=args.url, username=args.username, password=args.password, verify=args.verify_ssl)
         pdf_bytes = confluence.export_page(args.page_id)
     except Exception as e:
         print(f"Failed to export page {args.page_id}: {e}", file=sys.stderr)
-        raise SystemExit(1)
+        raise SystemExit(1) 
 
     if not pdf_bytes:
         print(f"No PDF content returned for page {args.page_id}", file=sys.stderr)

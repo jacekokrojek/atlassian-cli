@@ -21,10 +21,11 @@ def main():
     parser.add_argument('--all', dest='all_pages', action='store_true', help='Fetch all pages of results')
     parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
     parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
+    parser.add_argument('--verify-ssl', dest='verify_ssl', action='store_true', help='Enable SSL verification (default: False)')
 
     args = parser.parse_args()
 
-    client = Jira(url=args.url, username=args.username, password=args.password)
+    client = Jira(url=args.url, username=args.username, password=args.password, verify=args.verify_ssl)
     try:
         def fetch(start_at):
             return client.jql(args.jql, start=start_at, limit=args.limit)

@@ -16,10 +16,11 @@ def main():
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
     parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
     parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
+    parser.add_argument('--verify-ssl', dest='verify_ssl', action='store_true', help='Enable SSL verification (default: False)')
 
     args = parser.parse_args()
 
-    client = Confluence(url=args.url, username=args.username, password=args.password)
+    client = Confluence(url=args.url, username=args.username, password=args.password, verify=args.verify_ssl)
     try:
         page = client.get_page_by_id(args.page_id, expand='body.view')
         print(json.dumps(page, indent=2))
