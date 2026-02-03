@@ -8,7 +8,7 @@ import os
 import sys
 import argparse
 from atlassian import Jira
-from scripts.common_args import add_auth_args, get_auth_kwargs,environ_or_required
+from common_args import add_auth_args, get_auth_kwargs,environ_or_required
 
 
 def main():

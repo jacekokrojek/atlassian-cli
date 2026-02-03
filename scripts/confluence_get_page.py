@@ -8,11 +8,12 @@ import os
 import sys
 import argparse
 from atlassian import Confluence
-from scripts.common_args import add_auth_args, get_auth_kwargs, environ_or_required
+from common_args import add_auth_args, get_auth_kwargs, environ_or_required
+from confluence_utils import extract_space_and_title, extract_page_id
 
 def main():
     parser = argparse.ArgumentParser(description='Get a Confluence page by ID and print JSON')
-    parser.add_argument('page_id')
+    parser.add_argument('page_url', "Confluence page url")
     parser.add_argument('--url', **environ_or_required('CONFLUENCE_URL'),
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
     add_auth_args(parser)
@@ -22,7 +23,12 @@ def main():
     auth_kwargs = get_auth_kwargs(args)
     client = Confluence(url=args.url, **auth_kwargs)
     try:
-        page = client.get_page_by_id(args.page_id, expand='body.view')
+        page_id = extract_page_id(args.page_url)
+        if not page_id:
+            (space, title) = extract_space_and_title(args.page_url)
+            page_id = client.get_page_id(space, title)
+        
+        page = client.get_page_by_id(page_id, expand='body.view')
         print(json.dumps(page, indent=2))
     except Exception as e:
         print(f"Error fetching page {args.page_id}: {e}", file=sys.stderr)

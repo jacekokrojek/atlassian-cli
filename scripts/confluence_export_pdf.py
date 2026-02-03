@@ -8,10 +8,11 @@ import sys
 import argparse
 from atlassian import Confluence
 from common_args import add_auth_args, get_auth_kwargs, environ_or_required
+from confluence_utils import extract_space_and_title, extract_page_id
 
 def main():
     parser = argparse.ArgumentParser(description='Export a Confluence page to PDF and save to disk')
-    parser.add_argument('page_id')
+    parser.add_argument('page_url', "Confluence page url")
     parser.add_argument('--url', **environ_or_required('CONFLUENCE_URL'),
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
     parser.add_argument('-o', '--output', 'output_path', default=None,
@@ -23,9 +24,14 @@ def main():
 
     try:
         confluence = Confluence(url=args.url, **auth_kwargs)
-        pdf_bytes = confluence.export_page(args.page_id)
+        page_id = extract_page_id(args.page_url)
+        if not page_id:
+            (space, title) = extract_space_and_title(args.page_url)
+            page_id = confluence.get_page_id(space, title)
+        
+        pdf_bytes = confluence.export_page(page_id)
     except Exception as e:
-        print(f"Failed to export page {args.page_id}: {e}", file=sys.stderr)
+        print(f"Failed to export page {args.page_url}: {e}", file=sys.stderr)
         raise SystemExit(1) 
 
     if not pdf_bytes:
