@@ -42,6 +42,6 @@ def get_auth_kwargs(args):
     return {
         'username': args.username,
         'password': args.password,
-        'verify': args.verify_ssl,
+        'verify_ssl': args.verify_ssl,
     }
 

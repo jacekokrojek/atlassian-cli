@@ -15,7 +15,7 @@ def main():
     parser.add_argument('page_url', help="Confluence page url(e.g. https://your-domain.atlassian.net/wiki/z/asa)")
     parser.add_argument('--url', **environ_or_required('CONFLUENCE_URL'),
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
-    parser.add_argument('-o', '--output', default="../../../..",
+    parser.add_argument('-o', '--output', default=None,
                         help='Output path for PDF (defaults to confluence_page_<id>.pdf)')
     add_auth_args(parser)
 
