@@ -1,4 +1,5 @@
 import re
+from urllib.parse import unquote_plus
 
 PAGE_ID_PATTERNS = (
     re.compile(r"/spaces/([^/]+)/pages/(\d+)/[^/]+"),
@@ -23,4 +24,4 @@ def extract_space_and_title(source):
         if match:
             groups = match.groups()
             if len(groups) >= 2:
-                return groups[0], groups[1]
+                return groups[0], unquote_plus(groups[1])

@@ -12,10 +12,10 @@ from confluence_utils import extract_space_and_title, extract_page_id
 
 def main():
     parser = argparse.ArgumentParser(description='Export a Confluence page to PDF and save to disk')
-    parser.add_argument('page_url', "Confluence page url")
+    parser.add_argument('page_url', help="Confluence page url(e.g. https://your-domain.atlassian.net/wiki/z/asa)")
     parser.add_argument('--url', **environ_or_required('CONFLUENCE_URL'),
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
-    parser.add_argument('-o', '--output', 'output_path', default=None,
+    parser.add_argument('-o', '--output', default="../../../..",
                         help='Output path for PDF (defaults to confluence_page_<id>.pdf)')
     add_auth_args(parser)
 
@@ -35,10 +35,10 @@ def main():
         raise SystemExit(1) 
 
     if not pdf_bytes:
-        print(f"No PDF content returned for page {args.page_id}", file=sys.stderr)
+        print(f"No PDF content returned for page {args.page_url}", file=sys.stderr)
         raise SystemExit(1)
 
-    out = args.output or f"confluence_page_{args.page_id}.pdf"
+    out = args.output or f"confluence_page_{page_id}.pdf"
     out = os.path.abspath(out)
     try:
         with open(out, 'wb') as fh:

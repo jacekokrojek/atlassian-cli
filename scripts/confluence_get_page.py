@@ -13,7 +13,7 @@ from confluence_utils import extract_space_and_title, extract_page_id
 
 def main():
     parser = argparse.ArgumentParser(description='Get a Confluence page by ID and print JSON')
-    parser.add_argument('page_url', "Confluence page url")
+    parser.add_argument('page_url', help="Confluence page url(e.g. https://your-domain.atlassian.net/wiki/z/asa)")
     parser.add_argument('--url', **environ_or_required('CONFLUENCE_URL'),
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
     add_auth_args(parser)
