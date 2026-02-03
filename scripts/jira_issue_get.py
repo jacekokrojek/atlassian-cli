@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 """Get a Jira issue and print JSON.
 
-Usage: python scripts/jira_issue_get.py ISSUE-KEY --url <JIRA_URL>
+Usage: python scripts/jira_issue_get.py ISSUE-KEY
 """
 import json
 import os
 import sys
 import argparse
 from atlassian import Jira
+from common_args import add_auth_args, get_auth_kwargs ,environ_or_required
 
 def main():
     parser = argparse.ArgumentParser(description='Get a Jira issue and print JSON')
     parser.add_argument('issue_key')
-    parser.add_argument('--url', default=os.environ.get('JIRA_URL'), required=True,
+    parser.add_argument('--url', **environ_or_required('JIRA_URL'),
                         help='Jira base URL (e.g. https://your-domain.atlassian.net)')
-    parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
-    parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
-    parser.add_argument('--verify-ssl', dest='verify_ssl', action='store_true', help='Enable SSL verification (default: False)')
+    add_auth_args(parser)
 
     args = parser.parse_args()
+    auth_kwargs = get_auth_kwargs(args)
 
-    client = Jira(url=args.url, username=args.username, password=args.password, verify=args.verify_ssl)
+    client = Jira(url=args.url, **auth_kwargs)
     try:
         issue = client.issue(args.issue_key)
         print(json.dumps(issue, indent=2))

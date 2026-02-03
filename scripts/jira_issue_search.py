@@ -8,24 +8,23 @@ import os
 import sys
 import argparse
 from atlassian import Jira
-from atlassian_cli.utils import require_auth
+from scripts.common_args import add_auth_args, get_auth_kwargs,environ_or_required
 
 
 def main():
     parser = argparse.ArgumentParser(description='Search Jira issues via JQL and print JSON')
     parser.add_argument('jql')
-    parser.add_argument('--url', default=os.environ.get('JIRA_URL'), required=True,
+    parser.add_argument('--url', **environ_or_required('JIRA_URL'),
                         help='Jira base URL (e.g. https://your-domain.atlassian.net)')
     parser.add_argument('--start', type=int, default=0, help='Start index for pagination')
     parser.add_argument('--limit', type=int, default=50, help='Max results per page')
     parser.add_argument('--all', dest='all_pages', action='store_true', help='Fetch all pages of results')
-    parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
-    parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
-    parser.add_argument('--verify-ssl', dest='verify_ssl', action='store_true', help='Enable SSL verification (default: False)')
+    add_auth_args(parser)
 
     args = parser.parse_args()
+    auth_kwargs = get_auth_kwargs(args)
 
-    client = Jira(url=args.url, username=args.username, password=args.password, verify=args.verify_ssl)
+    client = Jira(url=args.url, **auth_kwargs)
     try:
         def fetch(start_at):
             return client.jql(args.jql, start=start_at, limit=args.limit)

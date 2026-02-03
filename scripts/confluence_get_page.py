@@ -8,19 +8,19 @@ import os
 import sys
 import argparse
 from atlassian import Confluence
+from scripts.common_args import add_auth_args, get_auth_kwargs, environ_or_required
 
 def main():
     parser = argparse.ArgumentParser(description='Get a Confluence page by ID and print JSON')
     parser.add_argument('page_id')
-    parser.add_argument('--url', default=os.environ.get('CONFLUENCE_URL'), required=True,
+    parser.add_argument('--url', **environ_or_required('CONFLUENCE_URL'),
                         help='Confluence base URL (e.g. https://your-domain.atlassian.net/wiki)')
-    parser.add_argument('--username', default=os.environ.get('USERNAME'), help='Username')
-    parser.add_argument('--password', default=os.environ.get('PASSWORD'), help='Password or token')
-    parser.add_argument('--verify-ssl', dest='verify_ssl', action='store_true', help='Enable SSL verification (default: False)')
+    add_auth_args(parser)
 
     args = parser.parse_args()
 
-    client = Confluence(url=args.url, username=args.username, password=args.password, verify=args.verify_ssl)
+    auth_kwargs = get_auth_kwargs(args)
+    client = Confluence(url=args.url, **auth_kwargs)
     try:
         page = client.get_page_by_id(args.page_id, expand='body.view')
         print(json.dumps(page, indent=2))
